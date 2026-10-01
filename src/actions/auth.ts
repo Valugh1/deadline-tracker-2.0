@@ -53,7 +53,7 @@ export async function registerUser(formData: {
     if (error instanceof z.ZodError) {
       return { error: error.issues[0]?.message || 'Dati non validi' };
     }
-    return { error: 'Si è verificato un errore durante la registrazione. Riprova.' };
+    return { error: error?.message || 'Si è verificato un errore durante la registrazione. Riprova.' };
   }
 }
 
