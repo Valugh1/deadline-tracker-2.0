@@ -9,6 +9,7 @@ import { users } from '@/db/schema';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
+  secret: process.env.AUTH_SECRET || 'x8ITbipNkLFRT+1EtgcaQ6SSzVpSbI0K1utfteEtsP0=',
   adapter: DrizzleAdapter(db),
   providers: [
     Credentials({
