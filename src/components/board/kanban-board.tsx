@@ -12,15 +12,18 @@ import CreateTaskModal from './create-task-modal';
 import {
   createDailyTask,
   updateDailyTaskStatus,
+  updateDailyTask,
   deleteDailyTask,
   reorderDailyTasks,
 } from '@/actions/daily-tasks';
 import {
   createLongTermTask,
   updateLongTermTaskStatus,
+  updateLongTermTask,
   deleteLongTermTask,
   reorderLongTermTasks,
 } from '@/actions/longterm-tasks';
+import { getDeadlineInfo } from '@/lib/utils';
 
 interface KanbanBoardProps {
   initialDailyTasks: DailyTask[];
@@ -218,6 +221,69 @@ export default function KanbanBoard({
     return { error: res.error || 'Errore nella creazione' };
   };
 
+  const handleUpdateDaily = async (
+    id: string,
+    data: { title: string; dueTime?: string; notes?: string }
+  ) => {
+    setDailyList((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              title: data.title,
+              dueTime: data.dueTime || null,
+              notes: data.notes || null,
+            }
+          : t
+      )
+    );
+    if (selectedTask && selectedTask.id === id) {
+      setSelectedTask((prev: any) => ({
+        ...prev,
+        title: data.title,
+        dueTime: data.dueTime || null,
+        notes: data.notes || null,
+      }));
+    }
+    await updateDailyTask(id, data);
+  };
+
+  const handleUpdateLongTerm = async (
+    id: string,
+    data: { title: string; dueDate: string; advanceNoticeDays: number; notes?: string }
+  ) => {
+    const deadlineInfo = getDeadlineInfo(data.dueDate, data.advanceNoticeDays);
+    setLongTermList((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              title: data.title,
+              dueDate: new Date(data.dueDate),
+              advanceNoticeDays: data.advanceNoticeDays,
+              notes: data.notes || null,
+              daysRemaining: deadlineInfo.daysRemaining,
+              deadlineState: deadlineInfo.state,
+              deadlineLabel: deadlineInfo.label,
+            }
+          : t
+      )
+    );
+    if (selectedTask && selectedTask.id === id) {
+      setSelectedTask((prev: any) => ({
+        ...prev,
+        title: data.title,
+        dueDate: new Date(data.dueDate),
+        advanceNoticeDays: data.advanceNoticeDays,
+        notes: data.notes || null,
+        daysRemaining: deadlineInfo.daysRemaining,
+        deadlineState: deadlineInfo.state,
+        deadlineLabel: deadlineInfo.label,
+      }));
+    }
+    await updateLongTermTask(id, data);
+  };
+
   // Filter tasks into columns
   const dailyTasksWithType = dailyList.map((t) => ({ ...t, type: 'daily' as const }));
   const longTermTasksWithType = longTermList.map((t) => ({
@@ -317,6 +383,8 @@ export default function KanbanBoard({
           onClose={() => setSelectedTask(null)}
           onStatusChange={handleModalStatusChange}
           onDelete={handleDeleteTask}
+          onUpdateDailyTask={handleUpdateDaily}
+          onUpdateLongTermTask={handleUpdateLongTerm}
         />
       )}
 
