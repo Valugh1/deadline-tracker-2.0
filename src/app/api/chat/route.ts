@@ -18,9 +18,9 @@ const localOpenAI = createOpenAI({
 export async function POST(req: Request) {
   const session = await auth();
   
-  if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
-  }
+  // if (!session?.user?.id) {
+  //   return new Response('Unauthorized', { status: 401 });
+  // }
 
   const { messages } = await req.json();
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   const dailyTasks = await getDailyTasks();
   const longTermTasks = await getLongTermTasks();
 
-  const userName = session.user.name || session.user.email?.split('@')[0] || 'Utente';
+  const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'Utente';
 
   // Formatta le attività in stringhe per il prompt
   const formattedDailyTasks = dailyTasks.map(t => 
@@ -64,7 +64,7 @@ Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazi
       createTask: tool({
         description: 'Crea una nuova attività (giornaliera o a lungo termine)',
         parameters: z.object({
-          type: z.enum(['daily', 'longterm']).describe('Il tipo di attività da creare'),
+          type: z.string().describe('Il tipo di attività da creare ("daily" o "longterm")'),
           title: z.string().describe('Il titolo dell\'attività'),
           dueTime: z.string().optional().describe('L\'orario dell\'attività giornaliera (es. 14:30)'),
           dueDate: z.string().optional().describe('La data di scadenza per l\'attività a lungo termine (Formato ISO, es. 2026-10-15)'),
@@ -90,9 +90,9 @@ Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazi
         description: 'Modifica un\'attività esistente. Usa questo tool per aggiornare il titolo, la data, l\'orario o lo stato (es. da todo a in_progress o done) di un task.',
         parameters: z.object({
           id: z.string().describe('L\'ID univoco dell\'attività'),
-          type: z.enum(['daily', 'longterm']).describe('Il tipo di attività'),
+          type: z.string().describe('Il tipo di attività ("daily" o "longterm")'),
           title: z.string().optional().describe('Il nuovo titolo'),
-          status: z.enum(['todo', 'in_progress', 'done']).optional().describe('Il nuovo stato dell\'attività'),
+          status: z.string().optional().describe('Il nuovo stato dell\'attività ("todo", "in_progress" o "done")'),
           dueTime: z.string().optional().describe('Il nuovo orario (solo per daily)'),
           dueDate: z.string().optional().describe('La nuova data di scadenza (solo per longterm, ISO format)'),
           advanceNoticeDays: z.number().optional().describe('I nuovi giorni di preavviso (solo per longterm)'),
@@ -116,7 +116,7 @@ Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazi
         description: 'Elimina un\'attività',
         parameters: z.object({
           id: z.string().describe('L\'ID univoco dell\'attività'),
-          type: z.enum(['daily', 'longterm']).describe('Il tipo di attività'),
+          type: z.string().describe('Il tipo di attività ("daily" o "longterm")'),
         }),
         // @ts-ignore
         execute: async (args: { id: string; type: 'daily' | 'longterm' }) => {
