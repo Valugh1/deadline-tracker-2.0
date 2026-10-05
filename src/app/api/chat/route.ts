@@ -135,5 +135,5 @@ Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazi
     },
   });
 
-  return result.toTextStreamResponse();
+  return result.toUIMessageStreamResponse();
 }
