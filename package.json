@@ -12,10 +12,13 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.83",
+    "@ai-sdk/react": "^4.0.130",
     "@auth/drizzle-adapter": "^1.11.3",
     "@hello-pangea/dnd": "^18.0.1",
     "@neondatabase/serverless": "^1.1.0",
     "@serwist/next": "^9.5.12",
+    "ai": "^7.0.127",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
