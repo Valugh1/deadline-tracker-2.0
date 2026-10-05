@@ -11,7 +11,7 @@ export function AiChat({ userName }: { userName: string }) {
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, status, sendMessage } = useChat({
+  const { messages, status, sendMessage, error } = useChat({
     // @ts-ignore - API exists in legacy implementations
     api: '/api/chat',
     onFinish: (message: any) => {
@@ -168,7 +168,7 @@ export function AiChat({ userName }: { userName: string }) {
                         : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-tl-sm'
                     }`}
                   >
-                    {/* Visualizza i tool calls o il testo */}
+                    {/* Visualizza i tool calls o il testo o errori */}
                     {(m as any).parts ? (
                       (m as any).parts.map((part: any, i: number) => (
                         <div key={i}>
@@ -176,6 +176,11 @@ export function AiChat({ userName }: { userName: string }) {
                           {part.type === 'tool-invocation' && (
                             <div className="mt-2 text-xs text-slate-400 italic bg-slate-900/50 p-2 rounded">
                               Esecuzione azione: {part.toolInvocation.toolName}...
+                            </div>
+                          )}
+                          {part.type === 'error' && (
+                            <div className="mt-2 text-xs text-red-400 italic bg-red-900/20 p-2 rounded">
+                              Si è verificato un errore: {part.error || 'Errore sconosciuto'}
                             </div>
                           )}
                         </div>
@@ -196,6 +201,11 @@ export function AiChat({ userName }: { userName: string }) {
                   </div>
                 </div>
               ))}
+              {error && (
+                <div className="text-center text-red-400 text-xs mt-2 bg-red-900/20 p-2 rounded">
+                  Errore di connessione: {error.message}
+                </div>
+              )}
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="bg-slate-800 text-slate-400 border border-slate-700 rounded-2xl rounded-tl-sm p-3 flex gap-2 items-center">
