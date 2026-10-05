@@ -1,10 +1,10 @@
 async function testChat() {
   try {
-    const res = await fetch('http://localhost:3006/api/chat', {
+    const res = await fetch('http://localhost:3007/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [{ role: 'user', content: 'crea task fare la spesa' }]
+        messages: [{ role: 'user', content: 'Crea una attività giornaliera chiamata "fare la spesa" adesso' }]
       })
     });
     

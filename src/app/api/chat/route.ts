@@ -18,9 +18,9 @@ const localOpenAI = createOpenAI({
 export async function POST(req: Request) {
   const session = await auth();
   
-  // if (!session?.user?.id) {
-  //   return new Response('Unauthorized', { status: 401 });
-  // }
+  if (!session?.user?.id) {
+    return new Response('Unauthorized', { status: 401 });
+  }
 
   const { messages } = await req.json();
 
@@ -56,13 +56,14 @@ Usa gli strumenti a tua disposizione per modificare, creare o eliminare i task s
 Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazione.`;
 
   const result = await generateText({
-    model: localOpenAI('gemma-4-e4b'), // Specifica il nome del modello qui, oppure usa quello di default del server
+    model: localOpenAI.chat('gemma-4-e4b'), // Forza l'uso di v1/chat/completions invece di v1/responses
     system: systemPrompt,
     messages,
     stopWhen: stepCountIs(5),
     tools: {
       createTask: tool({
         description: 'Crea una nuova attività (giornaliera o a lungo termine)',
+        strict: false,
         parameters: z.object({
           type: z.string().describe('Il tipo di attività da creare ("daily" o "longterm")'),
           title: z.string().describe('Il titolo dell\'attività'),
@@ -88,6 +89,7 @@ Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazi
       }),
       updateTask: tool({
         description: 'Modifica un\'attività esistente. Usa questo tool per aggiornare il titolo, la data, l\'orario o lo stato (es. da todo a in_progress o done) di un task.',
+        strict: false,
         parameters: z.object({
           id: z.string().describe('L\'ID univoco dell\'attività'),
           type: z.string().describe('Il tipo di attività ("daily" o "longterm")'),
@@ -114,6 +116,7 @@ Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazi
       }),
       deleteTask: tool({
         description: 'Elimina un\'attività',
+        strict: false,
         parameters: z.object({
           id: z.string().describe('L\'ID univoco dell\'attività'),
           type: z.string().describe('Il tipo di attività ("daily" o "longterm")'),
