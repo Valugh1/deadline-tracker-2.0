@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai';
-import { streamText, tool } from 'ai';
+import { streamText, tool, stepCountIs } from 'ai';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import { getDailyTasks, createDailyTask, updateDailyTask, deleteDailyTask, updateDailyTaskStatus } from '@/actions/daily-tasks';
@@ -59,6 +59,7 @@ Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazi
     model: localOpenAI('gemma-4-e4b'), // Specifica il nome del modello qui, oppure usa quello di default del server
     system: systemPrompt,
     messages,
+    stopWhen: stepCountIs(5),
     tools: {
       createTask: tool({
         description: 'Crea una nuova attività (giornaliera o a lungo termine)',

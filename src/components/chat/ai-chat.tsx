@@ -39,13 +39,7 @@ export function AiChat({ userName }: { userName: string }) {
     sendMessage(msg);
   };
 
-  // Saluto iniziale (opzionale: solo la prima volta che apre la chat)
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      const greeting = `Ciao ${userName}, come posso aiutarti?`;
-      speak(greeting);
-    }
-  }, [isOpen]);
+  // Rimosso saluto automatico per prevenire ghost audio bugs in PWA
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
