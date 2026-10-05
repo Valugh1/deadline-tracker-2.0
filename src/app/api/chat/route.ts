@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai';
-import { streamText, tool, stepCountIs } from 'ai';
+import { generateText, tool, stepCountIs } from 'ai';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import { getDailyTasks, createDailyTask, updateDailyTask, deleteDailyTask, updateDailyTaskStatus } from '@/actions/daily-tasks';
@@ -55,7 +55,7 @@ ${formattedLongTermTasks || 'Nessuna attività a lungo termine.'}
 Usa gli strumenti a tua disposizione per modificare, creare o eliminare i task se l'utente te lo chiede. 
 Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazione.`;
 
-  const result = streamText({
+  const result = await generateText({
     model: localOpenAI('gemma-4-e4b'), // Specifica il nome del modello qui, oppure usa quello di default del server
     system: systemPrompt,
     messages,
@@ -135,5 +135,5 @@ Usa gli ID dei task forniti qui sopra per le operazioni di modifica e cancellazi
     },
   });
 
-  return result.toUIMessageStreamResponse();
+  return Response.json({ text: result.text, toolCalls: result.toolCalls });
 }
