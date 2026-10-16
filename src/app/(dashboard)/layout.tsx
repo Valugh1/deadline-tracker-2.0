@@ -18,7 +18,7 @@ export default async function DashboardLayout({
   const userProfile = await getCurrentUserProfile();
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white">
+    <div className="min-h-screen flex flex-col">
       <Navbar
         user={{
           id: session.user.id,
@@ -27,7 +27,7 @@ export default async function DashboardLayout({
         }}
         userProfile={userProfile}
       />
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
       <AiChat userName={userProfile?.name || session.user.name || session.user.email?.split('@')[0] || 'Utente'} />
     </div>
   );

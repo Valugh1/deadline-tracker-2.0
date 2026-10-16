@@ -1,26 +1,122 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root,
+html[data-theme="dark"] {
+  --bg-base: #060913;
+  --bg-surface: rgba(15, 23, 42, 0.68);
+  --bg-surface-elevated: rgba(23, 33, 54, 0.92);
+  --bg-card: rgba(19, 28, 49, 0.85);
+  --bg-card-hover: rgba(28, 40, 68, 0.96);
+  --bg-glass-nav: rgba(6, 9, 19, 0.80);
+  --bg-input: rgba(9, 14, 28, 0.75);
+  --border-subtle: rgba(148, 163, 184, 0.14);
+  --border-strong: rgba(148, 163, 184, 0.28);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+  --aura-daily: radial-gradient(circle at 16% 10%, rgba(245, 158, 11, 0.16), transparent 45%),
+                radial-gradient(circle at 84% 16%, rgba(234, 88, 12, 0.12), transparent 50%),
+                radial-gradient(circle at 50% 90%, rgba(15, 23, 42, 0.9), transparent 70%);
+  --aura-longterm: radial-gradient(circle at 16% 10%, rgba(99, 102, 241, 0.19), transparent 45%),
+                   radial-gradient(circle at 84% 16%, rgba(168, 85, 247, 0.14), transparent 50%),
+                   radial-gradient(circle at 50% 90%, rgba(15, 23, 42, 0.9), transparent 70%);
+}
+
+html[data-theme="light"] {
+  --bg-base: #f3f6fc;
+  --bg-surface: rgba(255, 255, 255, 0.78);
+  --bg-surface-elevated: rgba(255, 255, 255, 0.97);
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-glass-nav: rgba(255, 255, 255, 0.85);
+  --bg-input: rgba(241, 245, 249, 0.85);
+  --border-subtle: rgba(15, 23, 42, 0.09);
+  --border-strong: rgba(15, 23, 42, 0.18);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --shadow-card: 0 8px 24px -6px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --aura-daily: radial-gradient(circle at 16% 10%, rgba(251, 191, 36, 0.20), transparent 45%),
+                radial-gradient(circle at 84% 16%, rgba(249, 115, 22, 0.12), transparent 50%);
+  --aura-longterm: radial-gradient(circle at 16% 10%, rgba(99, 102, 241, 0.16), transparent 45%),
+                   radial-gradient(circle at 84% 16%, rgba(168, 85, 247, 0.11), transparent 50%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.25s ease;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.kairon-aura-daily {
+  background-color: var(--bg-base);
+  background-image: var(--aura-daily);
+  transition: background-color 0.35s ease, background-image 0.5s ease;
+}
+
+.kairon-aura-longterm {
+  background-color: var(--bg-base);
+  background-image: var(--aura-longterm);
+  transition: background-color 0.35s ease, background-image 0.5s ease;
+}
+
+.glass-nav {
+  background: var(--bg-glass-nav);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.glass-surface {
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-elevated {
+  background: var(--bg-surface-elevated);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--border-strong);
+}
+
+.task-card-surface {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-card-surface:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
+}
+
+.kairon-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+}
+
+.kairon-input::placeholder {
+  color: var(--text-muted);
+}
+
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); opacity: 0.92; }
+  50% { transform: scale(1.07); opacity: 1; }
+}
+
+.ai-orb-glow {
+  animation: pulse-slow 3s infinite ease-in-out;
 }

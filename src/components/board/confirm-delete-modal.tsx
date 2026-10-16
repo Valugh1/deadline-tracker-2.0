@@ -24,15 +24,16 @@ export default function ConfirmDeleteModal({
         if (e.target === e.currentTarget && !isDeleting) onClose();
       }}
     >
-      <div className="bg-slate-800 border border-slate-700/60 rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center animate-in zoom-in-95 duration-200">
-        <div className="w-14 h-14 mx-auto bg-red-500/15 rounded-full flex items-center justify-center mb-4">
-          <Trash2 className="w-7 h-7 text-red-400" />
+      <div className="glass-elevated rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center animate-in zoom-in-95 duration-200">
+        <div className="w-14 h-14 mx-auto bg-rose-500/15 rounded-full flex items-center justify-center mb-4">
+          <Trash2 className="w-7 h-7 text-rose-400" />
         </div>
 
-        <h3 className="text-lg font-bold text-white mb-2">Elimina attività</h3>
+        <h3 className="text-lg font-extrabold mb-2" style={{ color: 'var(--text-primary)' }}>
+          Elimina attività
+        </h3>
         
-        {/* Exact text requested by user */}
-        <p className="text-sm text-slate-400 mb-6">
+        <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
           Vuoi eliminare definitivamente l&apos;attività?
         </p>
 
@@ -41,7 +42,7 @@ export default function ConfirmDeleteModal({
             type="button"
             disabled={isDeleting}
             onClick={onClose}
-            className="flex-1 py-2.5 bg-slate-700/60 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition-colors text-sm border border-slate-600/40"
+            className="flex-1 py-2.5 glass-surface hover:bg-slate-500/20 font-semibold rounded-xl transition-colors text-sm cursor-pointer"
           >
             Annulla
           </button>
@@ -49,7 +50,7 @@ export default function ConfirmDeleteModal({
             type="button"
             disabled={isDeleting}
             onClick={onConfirm}
-            className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors text-sm shadow-md shadow-red-500/20"
+            className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold rounded-xl transition-colors text-sm shadow-lg shadow-rose-500/25 cursor-pointer"
           >
             {isDeleting ? 'Eliminazione...' : 'Elimina'}
           </button>

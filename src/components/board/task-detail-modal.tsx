@@ -52,7 +52,6 @@ export default function TaskDetailModal({
   const [notes, setNotes] = useState(task.notes || '');
 
   const isDaily = viewType === 'daily';
-  const accentColor = isDaily ? 'amber' : 'indigo';
 
   const handleStatusClick = async (status: TaskStatus) => {
     if (task.status === status) return;
@@ -123,20 +122,17 @@ export default function TaskDetailModal({
           if (e.target === e.currentTarget && !isSaving && !isDeleting) onClose();
         }}
       >
-        <div className="bg-slate-800 border border-slate-700/60 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+        <div className="glass-elevated rounded-3xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
           
           {/* Header */}
           <div className="flex items-start justify-between mb-5 gap-3">
-            <h2 className="text-xl font-bold text-white leading-snug">
-              {isEditing ? (
-                <span>Modifica Attività</span>
-              ) : (
-                task.title
-              )}
+            <h2 className="text-xl font-extrabold leading-snug" style={{ color: 'var(--text-primary)' }}>
+              {isEditing ? <span>Modifica Attività</span> : task.title}
             </h2>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors shrink-0"
+              className="p-1.5 rounded-xl hover:bg-slate-500/20 transition-colors shrink-0 cursor-pointer"
+              style={{ color: 'var(--text-secondary)' }}
               aria-label="Chiudi finestra"
             >
               <X className="w-5 h-5" />
@@ -144,7 +140,7 @@ export default function TaskDetailModal({
           </div>
 
           {editError && (
-            <div className="mb-4 p-3 bg-red-500/15 border border-red-500/30 rounded-xl text-xs sm:text-sm text-red-300 flex items-center gap-2">
+            <div className="mb-4 p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-xs sm:text-sm text-rose-400 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{editError}</span>
             </div>
@@ -154,7 +150,7 @@ export default function TaskDetailModal({
           {isEditing ? (
             <form onSubmit={handleSaveEdit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                   Titolo attività *
                 </label>
                 <input
@@ -163,21 +159,23 @@ export default function TaskDetailModal({
                   onChange={(e) => setTitle(e.target.value)}
                   required
                   placeholder="Nome dell'attività"
-                  className={`w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-${accentColor}-500 focus:border-transparent transition-all text-sm`}
+                  className={`w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 ${
+                    isDaily ? 'focus:ring-amber-500' : 'focus:ring-indigo-500'
+                  } transition-all text-sm`}
                 />
               </div>
 
               {/* Daily Task specifics */}
               {isDaily && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                     Orario entro cui svolgerla
                   </label>
                   <input
                     type="time"
                     value={dueTime}
                     onChange={(e) => setDueTime(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all text-sm"
+                    className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-sm"
                   />
                 </div>
               )}
@@ -186,7 +184,7 @@ export default function TaskDetailModal({
               {!isDaily && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                       Data di scadenza *
                     </label>
                     <input
@@ -194,12 +192,12 @@ export default function TaskDetailModal({
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
                       required
-                      className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                      className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                       Giorni di preavviso per la notifica
                     </label>
                     <div className="relative">
@@ -209,9 +207,9 @@ export default function TaskDetailModal({
                         max={365}
                         value={advanceNoticeDays}
                         onChange={(e) => setAdvanceNoticeDays(Math.max(0, parseInt(e.target.value) || 0))}
-                        className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                        className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs">
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>
                         giorni prima
                       </span>
                     </div>
@@ -221,7 +219,7 @@ export default function TaskDetailModal({
 
               {/* Notes field */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                   Note
                 </label>
                 <textarea
@@ -229,27 +227,29 @@ export default function TaskDetailModal({
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder="Dettagli aggiuntivi..."
-                  className={`w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-${accentColor}-500 focus:border-transparent transition-all text-sm resize-none`}
+                  className={`w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 ${
+                    isDaily ? 'focus:ring-amber-500' : 'focus:ring-indigo-500'
+                  } transition-all text-sm resize-none`}
                 />
               </div>
 
               {/* Edit Mode Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-slate-700/40">
+              <div className="flex gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
                 <button
                   type="button"
                   disabled={isSaving}
                   onClick={() => setIsEditing(false)}
-                  className="flex-1 py-2.5 bg-slate-700/60 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition-colors text-sm border border-slate-600/40"
+                  className="flex-1 py-2.5 glass-surface hover:bg-slate-500/20 font-semibold rounded-xl transition-colors text-sm cursor-pointer"
                 >
                   Annulla
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className={`flex-1 py-2.5 text-white font-semibold rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 py-2.5 text-white font-bold rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-1.5 cursor-pointer ${
                     isDaily
-                      ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/25'
-                      : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/25'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25'
+                      : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-indigo-500/25'
                   }`}
                 >
                   <Check className="w-4 h-4" />
@@ -262,7 +262,7 @@ export default function TaskDetailModal({
             <>
               {/* Status selector buttons */}
               <div className="mb-5">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-secondary)' }}>
                   Stato
                 </label>
                 <div className="flex gap-2">
@@ -270,10 +270,10 @@ export default function TaskDetailModal({
                     type="button"
                     disabled={isChangingStatus}
                     onClick={() => handleStatusClick('todo')}
-                    className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                       task.status === 'todo'
-                        ? 'bg-slate-600/40 border-slate-400/50 text-white shadow-sm'
-                        : 'bg-slate-700/20 border-slate-700/40 text-slate-400 hover:text-slate-200 hover:border-slate-600/50'
+                        ? 'bg-slate-500/30 border-slate-400/60 shadow-sm'
+                        : 'glass-surface opacity-70 hover:opacity-100'
                     }`}
                   >
                     To Do
@@ -282,10 +282,10 @@ export default function TaskDetailModal({
                     type="button"
                     disabled={isChangingStatus}
                     onClick={() => handleStatusClick('in_progress')}
-                    className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                       task.status === 'in_progress'
-                        ? 'bg-blue-600/30 border-blue-400/50 text-blue-300 shadow-sm'
-                        : 'bg-slate-700/20 border-slate-700/40 text-slate-400 hover:text-slate-200 hover:border-slate-600/50'
+                        ? 'bg-sky-500/25 border-sky-400/60 text-sky-400 shadow-sm'
+                        : 'glass-surface opacity-70 hover:opacity-100'
                     }`}
                   >
                     In Progress
@@ -294,10 +294,10 @@ export default function TaskDetailModal({
                     type="button"
                     disabled={isChangingStatus}
                     onClick={() => handleStatusClick('done')}
-                    className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                       task.status === 'done'
-                        ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-300 shadow-sm'
-                        : 'bg-slate-700/20 border-slate-700/40 text-slate-400 hover:text-slate-200 hover:border-slate-600/50'
+                        ? 'bg-emerald-500/25 border-emerald-400/60 text-emerald-400 shadow-sm'
+                        : 'glass-surface opacity-70 hover:opacity-100'
                     }`}
                   >
                     Done
@@ -308,10 +308,10 @@ export default function TaskDetailModal({
               {/* Daily Task specifics */}
               {dailyTask && (
                 <div className="mb-5">
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-secondary)' }}>
                     Orario
                   </label>
-                  <div className="flex items-center gap-2 text-sm text-slate-200 bg-slate-900/40 border border-slate-700/40 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm glass-surface rounded-xl px-4 py-3">
                     <Clock className="w-4 h-4 text-amber-400" />
                     {dailyTask.dueTime ? `Entro le ${dailyTask.dueTime}` : 'Nessun orario specificato'}
                   </div>
@@ -323,24 +323,24 @@ export default function TaskDetailModal({
                 <>
                   <div className="grid grid-cols-2 gap-3 mb-5">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-secondary)' }}>
                         Scadenza
                       </label>
-                      <div className="flex items-center gap-2 text-sm text-slate-200 bg-slate-900/40 border border-slate-700/40 rounded-xl px-4 py-3">
+                      <div className="flex items-center gap-2 text-sm glass-surface rounded-xl px-4 py-3">
                         <Calendar className="w-4 h-4 text-indigo-400" />
                         {formatDisplayDate(ltTask.dueDate)}
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-secondary)' }}>
                         {daysLabel}
                       </label>
-                      <div className="text-sm bg-slate-900/40 border border-slate-700/40 rounded-xl px-4 py-3 text-center">
+                      <div className="text-sm glass-surface rounded-xl px-4 py-3 text-center">
                         <span
-                          className={`text-lg font-bold ${
+                          className={`text-lg font-extrabold ${
                             isExpired
-                              ? 'text-red-400'
+                              ? 'text-rose-400'
                               : daysRemaining <= ltTask.advanceNoticeDays
                               ? 'text-amber-400'
                               : 'text-emerald-400'
@@ -348,7 +348,7 @@ export default function TaskDetailModal({
                         >
                           {positiveDays}
                         </span>
-                        <span className="text-slate-400 ml-1">
+                        <span className="ml-1" style={{ color: 'var(--text-secondary)' }}>
                           {positiveDays === 1 ? 'giorno' : 'giorni'}
                         </span>
                       </div>
@@ -357,13 +357,13 @@ export default function TaskDetailModal({
 
                   {/* Status Badge */}
                   <div className="mb-5">
-                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-secondary)' }}>
                       Status scadenza
                     </label>
                     <div
                       className={`inline-flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl border ${
                         ltTask.deadlineState === 'expired'
-                          ? 'bg-red-500/15 border-red-500/30 text-red-400'
+                          ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
                           : ltTask.deadlineState === 'warning'
                           ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
                           : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
@@ -372,9 +372,9 @@ export default function TaskDetailModal({
                       {ltTask.deadlineState === 'expired' && <span>🔴</span>}
                       {ltTask.deadlineState === 'warning' && <span>🟡</span>}
                       {ltTask.deadlineState === 'on_track' && <span>🟢</span>}
-                      <span className="font-medium">{ltTask.deadlineLabel}</span>
+                      <span className="font-semibold">{ltTask.deadlineLabel}</span>
                       {ltTask.deadlineState === 'warning' && (
-                        <span className="text-xs opacity-70 ml-1">
+                        <span className="text-xs opacity-75 ml-1">
                           (preavviso: {ltTask.advanceNoticeDays} gg)
                         </span>
                       )}
@@ -385,23 +385,23 @@ export default function TaskDetailModal({
 
               {/* Notes */}
               <div className="mb-6">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-secondary)' }}>
                   Note
                 </label>
-                <div className="text-sm text-slate-300 bg-slate-900/40 border border-slate-700/40 rounded-xl px-4 py-3 leading-relaxed whitespace-pre-wrap min-h-[70px]">
-                  {task.notes || <span className="text-slate-500 italic">Nessuna nota specificata</span>}
+                <div className="text-sm glass-surface rounded-xl px-4 py-3 leading-relaxed whitespace-pre-wrap min-h-[70px]">
+                  {task.notes || <span className="italic" style={{ color: 'var(--text-muted)' }}>Nessuna nota specificata</span>}
                 </div>
               </div>
 
-              {/* Actions Footer: Modifica button replacing Chiudi + Elimina */}
-              <div className="flex gap-3 pt-4 border-t border-slate-700/40">
+              {/* Actions Footer */}
+              <div className="flex gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className={`flex-1 py-2.5 text-white font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-md ${
+                  className={`flex-1 py-2.5 text-white font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
                     isDaily
-                      ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/25'
-                      : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/25'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25'
+                      : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-indigo-500/25'
                   }`}
                 >
                   <Pencil className="w-4 h-4" />
@@ -410,7 +410,7 @@ export default function TaskDetailModal({
                 <button
                   type="button"
                   onClick={() => setShowConfirmDelete(true)}
-                  className="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/25 text-red-400 font-semibold rounded-xl transition-colors text-sm border border-red-500/30 flex items-center gap-1.5"
+                  className="py-2.5 px-4 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 font-bold rounded-xl transition-colors text-sm border border-rose-500/30 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span>Elimina</span>

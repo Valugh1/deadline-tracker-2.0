@@ -99,7 +99,7 @@ export function AiChat({ userName }: { userName: string }) {
         setIsListening(false);
       };
     }
-  }, [messages]); // messages dependency needed for sendMessage closure
+  }, [messages]);
 
   const toggleListening = () => {
     if (isListening) {
@@ -130,23 +130,37 @@ export function AiChat({ userName }: { userName: string }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 p-4 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 hover:scale-105 transition-all z-40"
+        className="fixed bottom-6 right-6 z-40 group flex items-center gap-3 p-1.5 pr-4 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white shadow-2xl shadow-indigo-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer"
         aria-label="Apri Kairon AI"
       >
-        <Bot size={28} />
+        <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center ai-orb-glow">
+          <Bot size={22} />
+        </div>
+        <div className="text-left hidden sm:block">
+          <p className="text-xs font-extrabold leading-none">Kairon AI</p>
+          <p className="text-xs text-indigo-200 leading-tight mt-0.5">Assistente Vocale</p>
+        </div>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-slate-900 w-full sm:w-[450px] h-[85vh] sm:h-[600px] flex flex-col rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden border border-slate-700">
-            <div className="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-end p-0 sm:p-6 bg-black/60 backdrop-blur-sm">
+          <div className="glass-elevated w-full sm:w-[430px] h-[85vh] sm:h-[580px] flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden border border-indigo-500/30">
+            <div
+              className="p-4 bg-gradient-to-r from-indigo-600/25 to-purple-600/25 border-b flex justify-between items-center"
+              style={{ borderColor: 'var(--border-subtle)' }}
+            >
               <div className="flex items-center gap-3">
-                <div className="bg-indigo-600 p-2 rounded-full">
+                <div className="bg-indigo-600 p-2 rounded-xl shadow">
                   <Bot size={20} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-slate-100 font-semibold text-lg">Kairon AI</h3>
-                  <p className="text-slate-400 text-xs">Connesso al tuo DB</p>
+                  <h3 className="font-extrabold text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
+                    Kairon AI Copilot
+                  </h3>
+                  <p className="text-emerald-400 text-xs flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    Connesso al tuo DB
+                  </p>
                 </div>
               </div>
               <button 
@@ -154,83 +168,86 @@ export function AiChat({ userName }: { userName: string }) {
                   setIsOpen(false);
                   window.speechSynthesis.cancel();
                 }}
-                className="text-slate-400 hover:text-white p-2"
+                className="p-1.5 rounded-xl hover:bg-slate-500/20 transition-colors cursor-pointer"
+                style={{ color: 'var(--text-secondary)' }}
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && (
-                <div className="text-center text-slate-500 mt-10">
-                  <Bot size={48} className="mx-auto mb-4 opacity-20" />
-                  <p>Ciao {userName}, chiedimi di aggiungere, modificare o mostrare i tuoi task!</p>
+                <div className="text-center mt-10 px-4" style={{ color: 'var(--text-secondary)' }}>
+                  <Bot size={44} className="mx-auto mb-3 opacity-30 text-indigo-400" />
+                  <p className="text-sm font-medium">
+                    Ciao {userName}, chiedimi a voce o via testo di aggiungere, modificare o mostrare i tuoi task!
+                  </p>
                 </div>
               )}
               
               {messages.map(m => (
                 <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div 
-                    className={`max-w-[85%] rounded-2xl p-3 ${
+                    className={`max-w-[85%] rounded-2xl p-3 text-sm ${
                       m.role === 'user' 
-                        ? 'bg-indigo-600 text-white rounded-tr-sm' 
-                        : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-tl-sm'
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-tr-sm shadow-md' 
+                        : 'glass-surface rounded-tl-sm'
                     }`}
                   >
                     <div>{m.content}</div>
                     {m.toolInvocations?.map((toolInvocation: any, i: number) => (
-                      <div key={i} className="mt-2 text-xs text-slate-400 italic bg-slate-900/50 p-2 rounded">
-                        Esecuzione azione: {toolInvocation.toolName}...
+                      <div key={i} className="mt-2 text-xs italic glass-surface p-2 rounded-lg" style={{ color: 'var(--text-secondary)' }}>
+                        ⚡ Esecuzione azione: {toolInvocation.toolName}...
                       </div>
                     ))}
                   </div>
                 </div>
               ))}
               {error && (
-                <div className="text-center text-red-400 text-xs mt-2 bg-red-900/20 p-2 rounded">
+                <div className="text-center text-rose-400 text-xs mt-2 bg-rose-500/15 border border-rose-500/30 p-2.5 rounded-xl">
                   Errore di connessione: {error.message}
                 </div>
               )}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-slate-800 text-slate-400 border border-slate-700 rounded-2xl rounded-tl-sm p-3 flex gap-2 items-center">
-                    <Loader2 size={16} className="animate-spin" /> Kairon sta pensando...
+                  <div className="glass-surface rounded-2xl rounded-tl-sm p-3 flex gap-2 items-center text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    <Loader2 size={16} className="animate-spin text-indigo-400" /> Kairon sta pensando...
                   </div>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-4 bg-slate-800 border-t border-slate-700">
+            <div className="p-3.5 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
               <form onSubmit={handleSubmit} className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={toggleListening}
-                  className={`p-3 rounded-full flex-shrink-0 transition-colors ${
+                  className={`p-3 rounded-xl flex-shrink-0 transition-colors cursor-pointer ${
                     isListening 
-                      ? 'bg-red-500/20 text-red-500 animate-pulse' 
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? 'bg-rose-500/20 text-rose-400 animate-pulse border border-rose-500/30' 
+                      : 'glass-surface hover:bg-indigo-500/20 text-indigo-400'
                   }`}
                   disabled={isLoading}
                 >
-                  {isListening ? <Square size={20} /> : <Mic size={20} />}
+                  {isListening ? <Square size={18} /> : <Mic size={18} />}
                 </button>
                 
                 <input
                   type="text"
                   value={input}
                   onChange={handleInputChange}
-                  placeholder={isListening ? "In ascolto..." : "Scrivi un messaggio..."}
-                  className="flex-1 bg-slate-900 border border-slate-700 text-slate-100 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-500"
+                  placeholder={isListening ? '🎙️ In ascolto...' : 'Scrivi o parla a Kairon AI...'}
+                  className="flex-1 kairon-input rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   disabled={isListening || isLoading}
                 />
                 
                 <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="p-3 bg-indigo-600 text-white rounded-full flex-shrink-0 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="p-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl flex-shrink-0 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-500/25 cursor-pointer"
                 >
-                  <Send size={20} />
+                  <Send size={18} />
                 </button>
               </form>
             </div>

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { X, User, Shield, Sliders, Check, AlertTriangle } from 'lucide-react';
+import { X, User, Shield, Sliders, AlertTriangle, Moon, Sun } from 'lucide-react';
 import { updateUserProfile, updateUserPassword, deleteUserAccount } from '@/actions/auth';
 import { signOut } from 'next-auth/react';
 import { UserProfile } from '@/types';
+import { useTheme } from '@/components/theme-provider';
 
 export type SettingsTab = 'profile' | 'security' | 'preferences';
 
@@ -26,6 +27,7 @@ export default function SettingsModal({
   onClose,
 }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+  const { theme, setTheme } = useTheme();
 
   // Profile Form State
   const [name, setName] = useState(userProfile?.name || currentUser.name || '');
@@ -144,51 +146,55 @@ export default function SettingsModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-slate-800 border border-slate-700/60 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+      <div className="glass-elevated rounded-3xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            Impostazioni
+          <h2 className="text-xl font-extrabold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            Impostazioni Account
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors"
+            className="p-1.5 rounded-xl hover:bg-slate-500/20 transition-colors cursor-pointer"
+            style={{ color: 'var(--text-secondary)' }}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab switcher */}
-        <div className="flex gap-1 mb-6 bg-slate-900/50 rounded-xl p-1 border border-slate-700/40">
+        <div className="flex gap-1 mb-6 glass-surface rounded-2xl p-1">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer ${
               activeTab === 'profile'
-                ? 'bg-slate-700/70 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'hover:bg-slate-500/10'
             }`}
+            style={activeTab !== 'profile' ? { color: 'var(--text-secondary)' } : undefined}
           >
             <User className="w-4 h-4" />
             Profilo
           </button>
           <button
             onClick={() => setActiveTab('security')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer ${
               activeTab === 'security'
-                ? 'bg-slate-700/70 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'hover:bg-slate-500/10'
             }`}
+            style={activeTab !== 'security' ? { color: 'var(--text-secondary)' } : undefined}
           >
             <Shield className="w-4 h-4" />
             Sicurezza
           </button>
           <button
             onClick={() => setActiveTab('preferences')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer ${
               activeTab === 'preferences'
-                ? 'bg-slate-700/70 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'hover:bg-slate-500/10'
             }`}
+            style={activeTab !== 'preferences' ? { color: 'var(--text-secondary)' } : undefined}
           >
             <Sliders className="w-4 h-4" />
             Preferenze
@@ -202,8 +208,8 @@ export default function SettingsModal({
               <div
                 className={`p-3 rounded-xl text-xs sm:text-sm border ${
                   profileMessage.type === 'success'
-                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                    : 'bg-red-500/15 border-red-500/30 text-red-300'
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                    : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
                 }`}
               >
                 {profileMessage.text}
@@ -211,7 +217,7 @@ export default function SettingsModal({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Nome completo
               </label>
               <input
@@ -219,12 +225,12 @@ export default function SettingsModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Email
               </label>
               <input
@@ -232,14 +238,14 @@ export default function SettingsModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
               />
             </div>
 
             <button
               type="submit"
               disabled={profileSaving}
-              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm shadow-md shadow-indigo-500/20"
+              className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm shadow-lg shadow-indigo-500/25 cursor-pointer"
             >
               {profileSaving ? 'Salvataggio...' : 'Salva Modifiche'}
             </button>
@@ -253,8 +259,8 @@ export default function SettingsModal({
               <div
                 className={`p-3 rounded-xl text-xs sm:text-sm border ${
                   passwordMessage.type === 'success'
-                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                    : 'bg-red-500/15 border-red-500/30 text-red-300'
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                    : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
                 }`}
               >
                 {passwordMessage.text}
@@ -262,7 +268,7 @@ export default function SettingsModal({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Password attuale
               </label>
               <input
@@ -271,12 +277,12 @@ export default function SettingsModal({
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Nuova password
               </label>
               <input
@@ -286,12 +292,12 @@ export default function SettingsModal({
                 required
                 minLength={6}
                 placeholder="Minimo 6 caratteri"
-                className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Conferma nuova password
               </label>
               <input
@@ -301,46 +307,46 @@ export default function SettingsModal({
                 required
                 minLength={6}
                 placeholder="Ripeti la nuova password"
-                className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
               />
             </div>
 
             <button
               type="submit"
               disabled={passwordSaving}
-              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm shadow-md shadow-indigo-500/20"
+              className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm shadow-lg shadow-indigo-500/25 cursor-pointer"
             >
               {passwordSaving ? 'Aggiornamento...' : 'Aggiorna Password'}
             </button>
 
             {/* Danger zone */}
-            <div className="pt-6 border-t border-slate-700/50 mt-6">
-              <h4 className="text-sm font-bold text-red-400 mb-1 flex items-center gap-1.5">
+            <div className="pt-6 border-t mt-6" style={{ borderColor: 'var(--border-subtle)' }}>
+              <h4 className="text-sm font-bold text-rose-400 mb-1 flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4" />
                 Zona pericolosa
               </h4>
-              <p className="text-xs text-slate-400 mb-3">
-                L eliminazione dell account è permanente e cancellerà tutte le tue attività e dati.
+              <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                L&apos;eliminazione dell&apos;account è permanente e cancellerà tutte le tue attività e dati.
               </p>
 
               {!showDeleteConfirm ? (
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold rounded-xl transition-all text-sm border border-red-500/30"
+                  className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold rounded-xl transition-all text-sm border border-rose-500/30 cursor-pointer"
                 >
                   Elimina Account
                 </button>
               ) : (
-                <div className="p-3 bg-red-950/40 border border-red-500/30 rounded-xl space-y-2">
-                  <p className="text-xs text-red-300 font-medium text-center">
+                <div className="p-3 bg-rose-950/40 border border-rose-500/30 rounded-xl space-y-2">
+                  <p className="text-xs text-rose-300 font-medium text-center">
                     Sei sicuro? Questa azione non può essere annullata.
                   </p>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 py-2 bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold"
+                      className="flex-1 py-2 glass-surface rounded-lg text-xs font-semibold cursor-pointer"
                     >
                       Annulla
                     </button>
@@ -348,7 +354,7 @@ export default function SettingsModal({
                       type="button"
                       disabled={deleting}
                       onClick={handleDeleteAccount}
-                      className="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold"
+                      className="flex-1 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold cursor-pointer"
                     >
                       {deleting ? 'Eliminazione...' : 'Conferma Eliminazione'}
                     </button>
@@ -366,40 +372,79 @@ export default function SettingsModal({
               <div
                 className={`p-3 rounded-xl text-xs sm:text-sm border ${
                   prefMessage.type === 'success'
-                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                    : 'bg-red-500/15 border-red-500/30 text-red-300'
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                    : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
                 }`}
               >
                 {prefMessage.text}
               </div>
             )}
 
+            {/* Theme Selection */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Tema Interfaccia
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setTheme('dark')}
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 text-left transition-all cursor-pointer ${
+                    theme === 'dark'
+                      ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 font-bold'
+                      : 'glass-surface opacity-75 hover:opacity-100'
+                  }`}
+                >
+                  <Moon className="w-4 h-4 shrink-0" />
+                  <div>
+                    <div className="text-xs font-bold">Modalità Notte</div>
+                    <div className="text-xs opacity-75">Predefinita (Obsidian)</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTheme('light')}
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 text-left transition-all cursor-pointer ${
+                    theme === 'light'
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-500 font-bold'
+                      : 'glass-surface opacity-75 hover:opacity-100'
+                  }`}
+                >
+                  <Sun className="w-4 h-4 shrink-0" />
+                  <div>
+                    <div className="text-xs font-bold">Modalità Giorno</div>
+                    <div className="text-xs opacity-75">Chiara (Alabaster)</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Fuso orario
               </label>
               <select
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-900/60 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                className="w-full px-4 py-2.5 kairon-input rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
               >
                 <option value="Europe/Rome">Europa/Roma (CET/CEST)</option>
                 <option value="Europe/London">Europa/Londra (GMT/BST)</option>
                 <option value="America/New_York">America/New York (EST/EDT)</option>
                 <option value="UTC">UTC</option>
               </select>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
                 Usato per sincronizzare le notifiche e il reset a mezzanotte.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                 Notifiche in-app
               </label>
               <div className="space-y-2">
-                <label className="flex items-center justify-between p-3 bg-slate-900/40 border border-slate-700/40 rounded-xl cursor-pointer hover:bg-slate-900/60 transition-colors">
-                  <span className="text-sm text-slate-300">Attività in scadenza</span>
+                <label className="flex items-center justify-between p-3 glass-surface rounded-xl cursor-pointer hover:border-indigo-500/40 transition-colors">
+                  <span className="text-sm">Attività in scadenza</span>
                   <input
                     type="checkbox"
                     checked={notifyExpiring}
@@ -407,8 +452,8 @@ export default function SettingsModal({
                     className="w-4 h-4 accent-indigo-500 rounded cursor-pointer"
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-slate-900/40 border border-slate-700/40 rounded-xl cursor-pointer hover:bg-slate-900/60 transition-colors">
-                  <span className="text-sm text-slate-300">Attività scadute</span>
+                <label className="flex items-center justify-between p-3 glass-surface rounded-xl cursor-pointer hover:border-indigo-500/40 transition-colors">
+                  <span className="text-sm">Attività scadute</span>
                   <input
                     type="checkbox"
                     checked={notifyExpired}
@@ -416,8 +461,8 @@ export default function SettingsModal({
                     className="w-4 h-4 accent-indigo-500 rounded cursor-pointer"
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-slate-900/40 border border-slate-700/40 rounded-xl cursor-pointer hover:bg-slate-900/60 transition-colors">
-                  <span className="text-sm text-slate-300">Avviso reset giornaliere completato</span>
+                <label className="flex items-center justify-between p-3 glass-surface rounded-xl cursor-pointer hover:border-indigo-500/40 transition-colors">
+                  <span className="text-sm">Avviso reset giornaliere completato</span>
                   <input
                     type="checkbox"
                     checked={notifyDailyReset}
@@ -431,7 +476,7 @@ export default function SettingsModal({
             <button
               type="submit"
               disabled={prefSaving}
-              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm shadow-md shadow-indigo-500/20"
+              className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm shadow-lg shadow-indigo-500/25 cursor-pointer"
             >
               {prefSaving ? 'Salvataggio...' : 'Salva Preferenze'}
             </button>
