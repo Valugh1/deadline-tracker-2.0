@@ -6,6 +6,7 @@ import { updateUserProfile, updateUserPassword, deleteUserAccount } from '@/acti
 import { signOut } from 'next-auth/react';
 import { UserProfile } from '@/types';
 import { useTheme } from '@/components/theme-provider';
+import PushNotificationsPanel from '@/components/notifications/push-notifications-panel';
 
 export type SettingsTab = 'profile' | 'security' | 'preferences';
 
@@ -47,6 +48,8 @@ export default function SettingsModal({
   const [notifyExpiring, setNotifyExpiring] = useState(userProfile?.notifyExpiring ?? true);
   const [notifyExpired, setNotifyExpired] = useState(userProfile?.notifyExpired ?? true);
   const [notifyDailyReset, setNotifyDailyReset] = useState(userProfile?.notifyDailyReset ?? false);
+  const [notifyDailyOverdue, setNotifyDailyOverdue] = useState(userProfile?.notifyDailyOverdue ?? true);
+  const [notifyMorningDigest, setNotifyMorningDigest] = useState(userProfile?.notifyMorningDigest ?? true);
   const [prefSaving, setPrefSaving] = useState(false);
   const [prefMessage, setPrefMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -66,6 +69,8 @@ export default function SettingsModal({
       notifyExpiring,
       notifyExpired,
       notifyDailyReset,
+      notifyDailyOverdue,
+      notifyMorningDigest,
     });
 
     setProfileSaving(false);
@@ -118,6 +123,8 @@ export default function SettingsModal({
       notifyExpiring,
       notifyExpired,
       notifyDailyReset,
+      notifyDailyOverdue,
+      notifyMorningDigest,
     });
 
     setPrefSaving(false);
@@ -440,11 +447,21 @@ export default function SettingsModal({
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                Notifiche in-app
+                Notifiche
               </label>
               <div className="space-y-2">
+                <PushNotificationsPanel />
                 <label className="flex items-center justify-between p-3 glass-surface rounded-xl cursor-pointer hover:border-indigo-500/40 transition-colors">
-                  <span className="text-sm">Attività in scadenza</span>
+                  <span className="text-sm">☕ Riepilogo mattutino delle 9:00</span>
+                  <input
+                    type="checkbox"
+                    checked={notifyMorningDigest}
+                    onChange={(e) => setNotifyMorningDigest(e.target.checked)}
+                    className="w-4 h-4 accent-indigo-500 rounded cursor-pointer"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 glass-surface rounded-xl cursor-pointer hover:border-indigo-500/40 transition-colors">
+                  <span className="text-sm">🟡 Preavviso attività in scadenza</span>
                   <input
                     type="checkbox"
                     checked={notifyExpiring}
@@ -453,11 +470,20 @@ export default function SettingsModal({
                   />
                 </label>
                 <label className="flex items-center justify-between p-3 glass-surface rounded-xl cursor-pointer hover:border-indigo-500/40 transition-colors">
-                  <span className="text-sm">Attività scadute</span>
+                  <span className="text-sm">🔴 Attività scadute</span>
                   <input
                     type="checkbox"
                     checked={notifyExpired}
                     onChange={(e) => setNotifyExpired(e.target.checked)}
+                    className="w-4 h-4 accent-indigo-500 rounded cursor-pointer"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 glass-surface rounded-xl cursor-pointer hover:border-indigo-500/40 transition-colors">
+                  <span className="text-sm">⏰ Orario giornaliere superato (&quot;entro le&quot;)</span>
+                  <input
+                    type="checkbox"
+                    checked={notifyDailyOverdue}
+                    onChange={(e) => setNotifyDailyOverdue(e.target.checked)}
                     className="w-4 h-4 accent-indigo-500 rounded cursor-pointer"
                   />
                 </label>

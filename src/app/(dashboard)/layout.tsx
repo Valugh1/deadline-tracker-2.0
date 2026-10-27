@@ -4,6 +4,7 @@ import Navbar from '@/components/navbar';
 import { getCurrentUserProfile } from '@/actions/auth';
 import { AiChat } from '@/components/chat/ai-chat';
 import { SearchProvider } from '@/components/search/search-provider';
+import PushSync from '@/components/notifications/push-sync';
 
 export default async function DashboardLayout({
   children,
@@ -21,6 +22,7 @@ export default async function DashboardLayout({
   return (
     <SearchProvider>
       <div className="min-h-screen flex flex-col">
+        <PushSync />
         <Navbar
           user={{
             id: session.user.id,

@@ -24,4 +24,6 @@ export interface UserProfile {
   notifyExpiring: boolean;
   notifyExpired: boolean;
   notifyDailyReset: boolean;
+  notifyDailyOverdue: boolean;
+  notifyMorningDigest: boolean;
 }

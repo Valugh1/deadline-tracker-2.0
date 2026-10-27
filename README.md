@@ -34,13 +34,20 @@
   - **Preferenze**: impostazione del fuso orario (Europa/Roma), notifiche in-app e lingua.
   - **Logout**.
 
-### 6. Progressive Web App (PWA)
+### 6. Progressive Web App (PWA) & Notifiche Push (Android & iOS)
 - Installabile su desktop, Android e iOS come app nativa.
 - Web App Manifest (`/manifest.webmanifest`) e Service Worker offline (`/sw.js`).
+- **Sistema di Notifiche Web Push (VAPID)** per Android e iOS (da iOS 16.4+ aggiungendo l'app alla Home):
+  - **Preavviso scadenza a lungo termine**: inviato quando un'attività entra nella finestra di preavviso configurata.
+  - **Scadenza superata**: inviato quando la data di scadenza a lungo termine è trascorsa.
+  - **Orario giornaliero superato ("entro le...")**: inviato appena l'orario indicato per un task giornaliero viene oltrepassato.
+  - **Riepilogo del Buongiorno (ore 09:00)**: inviato alle 9:00 locali con saluto personalizzato, le attività giornaliere e a lungo termine non svolte il giorno precedente e quelle in scadenza.
+  - **Resistente a lunghi periodi di inutilizzo**: gestione automatica di `pushsubscriptionchange` nel Service Worker e rinnovo silenzioso della sottoscrizione ad ogni apertura dell'app.
+  - Preferenze notifiche configurabili e pulsante per inviare una notifica di prova in Impostazioni.
 
-### 7. Reset Automatico a Mezzanotte (Vercel Cron)
-- Endpoint protetto `GET /api/cron/reset-daily` configurato in `vercel.json` (`0 22 * * *` UTC).
-- Resetta tutte le attività giornaliere a *To Do* ogni notte.
+### 7. Reset Automatico a Mezzanotte e Scheduler Notifiche
+- **Reset Giornaliero**: endpoint protetto `GET /api/cron/reset-daily` configurato in `vercel.json` (`0 23 * * *` UTC) con snapshot delle attività non completate ieri (`missed_on`).
+- **Motore Notifiche**: endpoint protetto `GET /api/cron/notifications` (autorizzato con `Authorization: Bearer <CRON_SECRET>`), pensato per essere richiamato ogni 5 minuti da uno scheduler esterno (es. [cron-job.org](https://cron-job.org)). Idempotente e sicuro grazie alla tabella di deduplica `notification_log`.
 
 ---
 
@@ -78,7 +85,12 @@ DATABASE_URL_UNPOOLED="postgresql://neondb_owner:YOUR_PASSWORD@ep-xxx.us-east-2.
 AUTH_SECRET="your-generated-secret"
 AUTH_URL="http://localhost:3000"
 CRON_SECRET="your-generated-cron-secret"
+NEXT_PUBLIC_VAPID_PUBLIC_KEY="your-vapid-public-key"
+VAPID_PRIVATE_KEY="your-vapid-private-key"
+VAPID_SUBJECT="mailto:admin@kairon.app"
 ```
+
+> **Generazione chiavi VAPID**: puoi generare una nuova coppia di chiavi in qualunque momento con il comando `npx web-push generate-vapid-keys`.
 
 ### 3. Esegui la migrazione del database su Neon
 ```bash
@@ -99,5 +111,9 @@ Apri [http://localhost:3000](http://localhost:3000) nel browser.
 2. Vercel inietta automaticamente `DATABASE_URL` dall'integrazione Neon.
 3. Aggiungi nelle Environment Variables di Vercel:
    - `AUTH_SECRET`: stringa generata casualmente (o quella in `.env.local`)
-   - `CRON_SECRET`: stringa per autenticare le chiamate cron di Vercel
-4. Il file `vercel.json` configurerà automaticamente il cron job `reset-daily` a mezzanotte.
+   - `CRON_SECRET`: stringa per autenticare le chiamate cron di Vercel e dello scheduler notifiche
+   - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: chiave VAPID pubblica
+   - `VAPID_PRIVATE_KEY`: chiave VAPID privata
+   - `VAPID_SUBJECT`: indirizzo di contatto (es. `mailto:tuo@email.com`)
+4. Configura uno scheduler (es. [cron-job.org](https://cron-job.org) ogni 5 minuti) verso `https://tuo-dominio.vercel.app/api/cron/notifications` con header `Authorization: Bearer <CRON_SECRET>`.
+5. Il file `vercel.json` configurerà inoltre il reset di sicurezza notturno a `0 23 * * *` UTC.

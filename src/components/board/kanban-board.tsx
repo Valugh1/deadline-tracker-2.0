@@ -29,11 +29,13 @@ import { getDeadlineInfo } from '@/lib/utils';
 interface KanbanBoardProps {
   initialDailyTasks: DailyTask[];
   initialLongTermTasks: EnrichedLongTermTask[];
+  initialView?: ViewType;
 }
 
 export default function KanbanBoard({
   initialDailyTasks,
   initialLongTermTasks,
+  initialView = 'daily',
 }: KanbanBoardProps) {
   // Prevent SSR hydration mismatch for drag & drop
   const [isMounted, setIsMounted] = useState(false);
@@ -42,10 +44,9 @@ export default function KanbanBoard({
     setIsMounted(true);
   }, []);
 
-  const [currentView, setCurrentView] = useState<ViewType>('daily');
+  const [currentView, setCurrentView] = useState<ViewType>(initialView);
   const [dailyList, setDailyList] = useState<DailyTask[]>(initialDailyTasks);
   const [longTermList, setLongTermList] = useState<EnrichedLongTermTask[]>(initialLongTermTasks);
-  const [quickFilter, setQuickFilter] = useState<'all' | 'urgent'>('all');
 
   const {
     boardFilterQuery,
@@ -323,20 +324,13 @@ export default function KanbanBoard({
   const rawActiveList =
     currentView === 'daily' ? dailyTasksWithType : longTermTasksWithType;
 
-  // Apply Search (from boardFilterQuery) & Quick Filter
+  // Apply Search (from boardFilterQuery)
   const normalizedQuery = boardFilterQuery.trim().toLowerCase();
   const activeTaskList = rawActiveList.filter((t) => {
     if (normalizedQuery) {
       const inTitle = t.title.toLowerCase().includes(normalizedQuery);
       const inNotes = (t.notes || '').toLowerCase().includes(normalizedQuery);
       if (!inTitle && !inNotes) return false;
-    }
-    if (quickFilter === 'urgent') {
-      if (t.type === 'longterm') {
-        return t.deadlineState === 'warning' || t.deadlineState === 'expired';
-      } else {
-        return Boolean(t.dueTime) && t.status !== 'done';
-      }
     }
     return true;
   });
@@ -359,7 +353,7 @@ export default function KanbanBoard({
     <div className={`min-h-[calc(100vh-64px)] ${auraClass}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         
-        {/* ACTION BAR: VIEW SWITCHER + QUICK FILTERS + CREATE CTA */}
+        {/* ACTION BAR: VIEW SWITCHER + CREATE CTA */}
         <section className="flex flex-col sm:flex-row items-center justify-between gap-4 glass-surface p-2.5 rounded-2xl">
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <ViewSwitcher
@@ -368,21 +362,6 @@ export default function KanbanBoard({
               dailyCount={dailyList.length}
               longTermCount={longTermList.length}
             />
-
-            <button
-              type="button"
-              onClick={() => setQuickFilter(quickFilter === 'urgent' ? 'all' : 'urgent')}
-              className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                quickFilter === 'urgent'
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  : 'hover:bg-slate-500/10'
-              }`}
-              style={quickFilter !== 'urgent' ? { color: 'var(--text-secondary)' } : undefined}
-              title="Filtra solo le attività prioritarie o in scadenza"
-            >
-              <span>⚡</span>
-              <span>Prioritarie</span>
-            </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">

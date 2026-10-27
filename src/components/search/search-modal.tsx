@@ -18,7 +18,7 @@ export default function SearchModal() {
     setBoardFilterQuery,
   } = useSearch();
 
-  const [activeTab, setActiveTab] = useState<'all' | 'daily' | 'longterm' | 'urgent'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'daily' | 'longterm'>('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -40,13 +40,6 @@ export default function SearchModal() {
       // Tab filter
       if (activeTab === 'daily' && task.type !== 'daily') return false;
       if (activeTab === 'longterm' && task.type !== 'longterm') return false;
-      if (activeTab === 'urgent') {
-        if (task.type === 'longterm') {
-          if (task.deadlineState !== 'warning' && task.deadlineState !== 'expired') return false;
-        } else {
-          if (!task.dueTime || task.status === 'done') return false;
-        }
-      }
 
       // Query filter
       if (!q) return true;
@@ -208,18 +201,6 @@ export default function SearchModal() {
               style={activeTab !== 'longterm' ? { color: 'var(--text-secondary)' } : undefined}
             >
               📅 Scadenze ({tasks.filter((t) => t.type === 'longterm').length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('urgent')}
-              className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
-                activeTab === 'urgent'
-                  ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                  : 'hover:bg-slate-500/10'
-              }`}
-              style={activeTab !== 'urgent' ? { color: 'var(--text-secondary)' } : undefined}
-            >
-              ⚡ Urgenti
             </button>
           </div>
 

@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { dailyTasks } from '@/db/schema';
-import { ne } from 'drizzle-orm';
+import { runDailyResets } from '@/lib/notifications';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * Daily safety-net reset (Vercel Cron). The reset is timezone-aware and idempotent:
+ * each user's daily tasks are reset only once their local date has changed, and
+ * incomplete tasks are stamped as "missed" for the 9:00 digest. The same logic also
+ * runs inside /api/cron/notifications, so whichever fires first after midnight wins.
+ */
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
@@ -13,20 +19,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Reset all daily tasks that are not 'todo' back to 'todo'
-    const result = await db
-      .update(dailyTasks)
-      .set({
-        status: 'todo',
-        updatedAt: new Date(),
-      })
-      .where(ne(dailyTasks.status, 'todo'))
-      .returning({ id: dailyTasks.id });
+    const resetCount = await runDailyResets();
 
     return NextResponse.json({
       success: true,
-      message: 'Daily tasks successfully reset to "todo"',
-      resetCount: result.length,
+      message: 'Daily tasks reset check completed',
+      resetCount,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

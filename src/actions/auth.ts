@@ -72,6 +72,8 @@ export async function getCurrentUserProfile() {
       notifyExpiring: users.notifyExpiring,
       notifyExpired: users.notifyExpired,
       notifyDailyReset: users.notifyDailyReset,
+      notifyDailyOverdue: users.notifyDailyOverdue,
+      notifyMorningDigest: users.notifyMorningDigest,
     })
     .from(users)
     .where(eq(users.id, session.user.id))
@@ -87,6 +89,8 @@ export async function updateUserProfile(data: {
   notifyExpiring?: boolean;
   notifyExpired?: boolean;
   notifyDailyReset?: boolean;
+  notifyDailyOverdue?: boolean;
+  notifyMorningDigest?: boolean;
 }) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -118,6 +122,8 @@ export async function updateUserProfile(data: {
         notifyExpiring: data.notifyExpiring ?? true,
         notifyExpired: data.notifyExpired ?? true,
         notifyDailyReset: data.notifyDailyReset ?? false,
+        notifyDailyOverdue: data.notifyDailyOverdue ?? true,
+        notifyMorningDigest: data.notifyMorningDigest ?? true,
         updatedAt: new Date(),
       })
       .where(eq(users.id, session.user.id));

@@ -4,6 +4,8 @@ import { sql } from 'drizzle-orm';
 export async function resetAndInitializeDatabase() {
   // 1. Drop existing tables completely to clean old data
   const dropStatements = [
+    'DROP TABLE IF EXISTS "notification_log" CASCADE;',
+    'DROP TABLE IF EXISTS "push_subscription" CASCADE;',
     'DROP TABLE IF EXISTS "verificationToken" CASCADE;',
     'DROP TABLE IF EXISTS "account" CASCADE;',
     'DROP TABLE IF EXISTS "daily_task" CASCADE;',
@@ -37,6 +39,9 @@ export async function resetAndInitializeDatabase() {
       "notify_expiring" boolean DEFAULT true NOT NULL,
       "notify_expired" boolean DEFAULT true NOT NULL,
       "notify_daily_reset" boolean DEFAULT false NOT NULL,
+      "notify_daily_overdue" boolean DEFAULT true NOT NULL,
+      "notify_morning_digest" boolean DEFAULT true NOT NULL,
+      "last_daily_reset_on" text,
       "created_at" timestamp DEFAULT now() NOT NULL,
       "updated_at" timestamp DEFAULT now() NOT NULL
     );`,
@@ -71,6 +76,7 @@ export async function resetAndInitializeDatabase() {
       "due_time" text,
       "notes" text,
       "sort_order" integer DEFAULT 0 NOT NULL,
+      "missed_on" text,
       "created_at" timestamp DEFAULT now() NOT NULL,
       "updated_at" timestamp DEFAULT now() NOT NULL
     );`,
@@ -87,6 +93,27 @@ export async function resetAndInitializeDatabase() {
       "created_at" timestamp DEFAULT now() NOT NULL,
       "updated_at" timestamp DEFAULT now() NOT NULL
     );`,
+
+    `CREATE TABLE IF NOT EXISTS "push_subscription" (
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+      "user_id" text NOT NULL REFERENCES "user"("id") ON DELETE cascade,
+      "endpoint" text NOT NULL,
+      "p256dh" text NOT NULL,
+      "auth" text NOT NULL,
+      "user_agent" text,
+      "created_at" timestamp DEFAULT now() NOT NULL,
+      "last_seen_at" timestamp DEFAULT now() NOT NULL
+    );`,
+    'CREATE UNIQUE INDEX IF NOT EXISTS "push_subscription_endpoint_idx" ON "push_subscription" ("endpoint");',
+    'CREATE INDEX IF NOT EXISTS "push_subscription_user_idx" ON "push_subscription" ("user_id");',
+
+    `CREATE TABLE IF NOT EXISTS "notification_log" (
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+      "user_id" text NOT NULL REFERENCES "user"("id") ON DELETE cascade,
+      "dedup_key" text NOT NULL,
+      "sent_at" timestamp DEFAULT now() NOT NULL
+    );`,
+    'CREATE UNIQUE INDEX IF NOT EXISTS "notification_log_user_key_idx" ON "notification_log" ("user_id", "dedup_key");',
   ];
 
   for (const stmt of createStatements) {

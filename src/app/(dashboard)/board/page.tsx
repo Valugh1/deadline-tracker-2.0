@@ -10,16 +10,22 @@ export const metadata = {
 // Revalidate on demand
 export const dynamic = 'force-dynamic';
 
-export default async function BoardPage() {
-  const [dailyTasks, longTermTasks] = await Promise.all([
+export default async function BoardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  const [dailyTasks, longTermTasks, params] = await Promise.all([
     getDailyTasks(),
     getLongTermTasks(),
+    searchParams,
   ]);
 
   return (
     <KanbanBoard
       initialDailyTasks={dailyTasks}
       initialLongTermTasks={longTermTasks}
+      initialView={params.view === 'longterm' ? 'longterm' : 'daily'}
     />
   );
 }
