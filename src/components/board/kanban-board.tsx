@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
-import { Plus, Search, Zap, CheckCircle2, Sparkles } from 'lucide-react';
-import { ViewType, TaskStatus, EnrichedLongTermTask } from '@/types';
+import { Plus } from 'lucide-react';
+import { ViewType, TaskStatus, EnrichedLongTermTask, TaskItem } from '@/types';
 import { DailyTask } from '@/db/schema';
 import ViewSwitcher from './view-switcher';
 import KanbanColumn from './kanban-column';
 import TaskDetailModal from './task-detail-modal';
 import CreateTaskModal from './create-task-modal';
+import { useSearch } from '@/components/search/search-provider';
 import {
   createDailyTask,
   updateDailyTaskStatus,
@@ -36,39 +37,23 @@ export default function KanbanBoard({
 }: KanbanBoardProps) {
   // Prevent SSR hydration mismatch for drag & drop
   const [isMounted, setIsMounted] = useState(false);
-  const [resetCountdown, setResetCountdown] = useState<string>('');
-  const [todayFormatted, setTodayFormatted] = useState<string>('');
 
   useEffect(() => {
     setIsMounted(true);
-
-    const updateTimeInfo = () => {
-      const now = new Date();
-      const midnight = new Date(now);
-      midnight.setHours(24, 0, 0, 0);
-      const diffMs = midnight.getTime() - now.getTime();
-      const hours = Math.floor(diffMs / (1000 * 60 * 60));
-      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-      setResetCountdown(`tra ${hours}h ${minutes}m`);
-
-      const formatted = now.toLocaleDateString('it-IT', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-      });
-      setTodayFormatted(formatted.charAt(0).toUpperCase() + formatted.slice(1));
-    };
-
-    updateTimeInfo();
-    const timer = setInterval(updateTimeInfo, 60000);
-    return () => clearInterval(timer);
   }, []);
 
   const [currentView, setCurrentView] = useState<ViewType>('daily');
   const [dailyList, setDailyList] = useState<DailyTask[]>(initialDailyTasks);
   const [longTermList, setLongTermList] = useState<EnrichedLongTermTask[]>(initialLongTermTasks);
-  const [searchQuery, setSearchQuery] = useState('');
   const [quickFilter, setQuickFilter] = useState<'all' | 'urgent'>('all');
+
+  const {
+    boardFilterQuery,
+    setBoardFilterQuery,
+    setTasks,
+    registerSelectTaskHandler,
+    registerViewChangeHandler,
+  } = useSearch();
 
   // Modals state
   const [selectedTask, setSelectedTask] = useState<
@@ -78,6 +63,31 @@ export default function KanbanBoard({
   >(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [, startTransition] = useTransition();
+
+  // Synchronize tasks with SearchContext
+  useEffect(() => {
+    const allTasks: TaskItem[] = [
+      ...dailyList.map((t) => ({ ...t, type: 'daily' as const })),
+      ...longTermList.map((t) => ({ ...t, type: 'longterm' as const })),
+    ];
+    setTasks(allTasks);
+  }, [dailyList, longTermList, setTasks]);
+
+  // Register task selection and view change handlers with SearchContext
+  useEffect(() => {
+    registerSelectTaskHandler((task: TaskItem) => {
+      if (task.type !== currentView) {
+        setCurrentView(task.type);
+      }
+      setSelectedTask(task);
+    });
+  }, [currentView, registerSelectTaskHandler]);
+
+  useEffect(() => {
+    registerViewChangeHandler((view: ViewType) => {
+      setCurrentView(view);
+    });
+  }, [registerViewChangeHandler]);
 
   // Keep state in sync with server revalidations
   useEffect(() => {
@@ -313,10 +323,10 @@ export default function KanbanBoard({
   const rawActiveList =
     currentView === 'daily' ? dailyTasksWithType : longTermTasksWithType;
 
-  // Apply Search & Quick Filter
-  const normalizedQuery = searchQuery.trim().toLowerCase();
+  // Apply Search (from boardFilterQuery) & Quick Filter
+  const normalizedQuery = boardFilterQuery.trim().toLowerCase();
   const activeTaskList = rawActiveList.filter((t) => {
-    if ( normalizedQuery ) {
+    if (normalizedQuery) {
       const inTitle = t.title.toLowerCase().includes(normalizedQuery);
       const inNotes = (t.notes || '').toLowerCase().includes(normalizedQuery);
       if (!inTitle && !inNotes) return false;
@@ -335,15 +345,6 @@ export default function KanbanBoard({
   const inProgressTasks = activeTaskList.filter((t) => t.status === 'in_progress');
   const doneTasks = activeTaskList.filter((t) => t.status === 'done');
 
-  // Compute Bento KPIs
-  const totalInView = rawActiveList.length;
-  const completedInView = rawActiveList.filter((t) => t.status === 'done').length;
-  const pendingInView = totalInView - completedInView;
-  const completionPercent = totalInView > 0 ? Math.round((completedInView / totalInView) * 100) : 0;
-
-  const warningCount = longTermList.filter((t) => t.deadlineState === 'warning' && t.status !== 'done').length;
-  const expiredCount = longTermList.filter((t) => t.deadlineState === 'expired' && t.status !== 'done').length;
-
   const auraClass = currentView === 'daily' ? 'kairon-aura-daily' : 'kairon-aura-longterm';
 
   if (!isMounted) {
@@ -358,169 +359,60 @@ export default function KanbanBoard({
     <div className={`min-h-[calc(100vh-64px)] ${auraClass}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         
-        {/* BENTO HEADER & STATISTICS */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-          {/* Overview & Reset Countdown Card */}
-          <div className="lg:col-span-5 glass-surface rounded-2xl p-5 flex flex-col justify-between">
-            <div>
-              <span
-                className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                  currentView === 'daily' ? 'text-amber-400' : 'text-indigo-400'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{todayFormatted || 'Oggi'}</span>
-              </span>
-              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight mt-1">
-                {currentView === 'daily' ? 'Focus Giornaliero' : 'Pianificazione Scadenze'}
-              </h1>
-              <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-                Hai{' '}
-                <strong className={currentView === 'daily' ? 'text-amber-400' : 'text-indigo-400'}>
-                  {pendingInView} {pendingInView === 1 ? 'attività attiva' : 'attività attive'}
-                </strong>{' '}
-                in questa vista.
-              </p>
-            </div>
-
-            <div
-              className="mt-4 pt-3 border-t flex items-center justify-between text-xs flex-wrap gap-2"
-              style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
-            >
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Reset giornaliero: <strong>00:00 ({resetCountdown || 'mezzanotte'})</strong>
-              </span>
-              <span className="font-semibold text-emerald-400">
-                ✓ {completedInView} completate
-              </span>
-            </div>
-          </div>
-
-          {/* Bento KPI Cards */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            {/* KPI 1: Progress */}
-            <div className="glass-surface rounded-2xl p-4 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                  Completamento
-                </span>
-                <span className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-                  <CheckCircle2 className="w-4 h-4" />
-                </span>
-              </div>
-              <div className="mt-3">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-2xl font-extrabold">{completionPercent}%</span>
-                  <span className="text-xs text-emerald-400 font-semibold">
-                    {completedInView} / {totalInView} task
-                  </span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-slate-500/20 mt-2 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-                    style={{ width: `${completionPercent}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* KPI 2: Deadlines Monitor */}
-            <div className="glass-surface rounded-2xl p-4 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                  Stato Scadenze
-                </span>
-                <span className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
-                  <Zap className="w-4 h-4" />
-                </span>
-              </div>
-              <div className="mt-3">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-amber-400">{warningCount}</span>
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    in scadenza
-                  </span>
-                </div>
-                <p className="text-xs font-medium mt-1.5 flex items-center gap-1.5">
-                  {expiredCount > 0 ? (
-                    <span className="text-rose-400">🔴 {expiredCount} scadute da risolvere</span>
-                  ) : (
-                    <span className="text-emerald-400">🟢 Nessuna attività scaduta</span>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {/* KPI 3: Search & Quick Filter */}
-            <div className="glass-surface rounded-2xl p-4 flex flex-col justify-between">
-              <span className="text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
-                Ricerca & Filtro Rapido
-              </span>
-              <div className="relative mb-2">
-                <Search
-                  className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                  style={{ color: 'var(--text-muted)' }}
-                />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cerca task o note..."
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl kairon-input focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                />
-              </div>
-              <div className="flex gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setQuickFilter('all')}
-                  className={`flex-1 py-1 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    quickFilter === 'all'
-                      ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                      : 'hover:bg-slate-500/10'
-                  }`}
-                  style={quickFilter !== 'all' ? { color: 'var(--text-secondary)' } : undefined}
-                >
-                  Tutte
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setQuickFilter(quickFilter === 'urgent' ? 'all' : 'urgent')}
-                  className={`flex-1 py-1 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    quickFilter === 'urgent'
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      : 'hover:bg-slate-500/10'
-                  }`}
-                  style={quickFilter !== 'urgent' ? { color: 'var(--text-secondary)' } : undefined}
-                >
-                  ⚡ Prioritarie
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ACTION BAR: VIEW SWITCHER + CREATE CTA */}
+        {/* ACTION BAR: VIEW SWITCHER + QUICK FILTERS + CREATE CTA */}
         <section className="flex flex-col sm:flex-row items-center justify-between gap-4 glass-surface p-2.5 rounded-2xl">
-          <ViewSwitcher
-            currentView={currentView}
-            onViewChange={(view) => setCurrentView(view)}
-            dailyCount={dailyList.length}
-            longTermCount={longTermList.length}
-          />
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <ViewSwitcher
+              currentView={currentView}
+              onViewChange={(view) => setCurrentView(view)}
+              dailyCount={dailyList.length}
+              longTermCount={longTermList.length}
+            />
 
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer ${
-              currentView === 'daily'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25'
-                : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-indigo-500/25'
-            }`}
-          >
-            <Plus className="w-4 h-4" />
-            <span>Nuova Attività</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setQuickFilter(quickFilter === 'urgent' ? 'all' : 'urgent')}
+              className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                quickFilter === 'urgent'
+                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  : 'hover:bg-slate-500/10'
+              }`}
+              style={quickFilter !== 'urgent' ? { color: 'var(--text-secondary)' } : undefined}
+              title="Filtra solo le attività prioritarie o in scadenza"
+            >
+              <span>⚡</span>
+              <span>Prioritarie</span>
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
+            {boardFilterQuery && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+                <span>Filtro: &quot;{boardFilterQuery}&quot;</span>
+                <button
+                  type="button"
+                  onClick={() => setBoardFilterQuery('')}
+                  className="hover:text-white cursor-pointer ml-1 text-slate-400 hover:text-white transition-colors"
+                  title="Rimuovi filtro di ricerca"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer ${
+                currentView === 'daily'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25'
+                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-indigo-500/25'
+              }`}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nuova Attività</span>
+            </button>
+          </div>
         </section>
 
         {/* KANBAN BOARD (3 COLUMNS) */}

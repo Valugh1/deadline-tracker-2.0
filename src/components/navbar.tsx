@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
-import { User, Shield, Sliders, LogOut, Moon, Sun, ChevronDown } from 'lucide-react';
+import { User, Shield, Sliders, LogOut, Moon, Sun, ChevronDown, Search } from 'lucide-react';
 import SettingsModal, { SettingsTab } from '@/components/settings/settings-modal';
 import { UserProfile } from '@/types';
 import { useTheme } from '@/components/theme-provider';
+import { useSearch } from '@/components/search/search-provider';
 
 interface NavbarProps {
   user: {
@@ -22,6 +23,7 @@ export default function Navbar({ user, userProfile }: NavbarProps) {
   const [activeSettingsTab, setActiveSettingsTab] = useState<SettingsTab>('profile');
   const menuRef = useRef<HTMLDivElement>(null);
   const { theme, toggleTheme } = useTheme();
+  const { openSearch } = useSearch();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -67,6 +69,23 @@ export default function Navbar({ user, userProfile }: NavbarProps) {
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3 relative" ref={menuRef}>
+            {/* Search Icon Button */}
+            <button
+              type="button"
+              onClick={openSearch}
+              className="glass-surface px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-semibold hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Cerca attività (Ctrl+K)"
+              aria-label="Cerca attività"
+            >
+              <Search className="w-4 h-4 text-indigo-400" />
+              <span className="hidden sm:inline" style={{ color: 'var(--text-secondary)' }}>
+                Cerca
+              </span>
+              <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                ⌘K
+              </kbd>
+            </button>
+
             {/* Night / Day Theme Toggle Button */}
             <button
               type="button"
