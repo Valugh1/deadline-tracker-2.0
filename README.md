@@ -117,3 +117,23 @@ Apri [http://localhost:3000](http://localhost:3000) nel browser.
    - `VAPID_SUBJECT`: indirizzo di contatto (es. `mailto:tuo@email.com`)
 4. Configura uno scheduler (es. [cron-job.org](https://cron-job.org) ogni 5 minuti) verso `https://tuo-dominio.vercel.app/api/cron/notifications` con header `Authorization: Bearer <CRON_SECRET>`.
 5. Il file `vercel.json` configurerà inoltre il reset di sicurezza notturno a `0 23 * * *` UTC.
+
+---
+
+## 📌 Prossimi Step e Roadmap (Future Implementazioni)
+
+Di seguito sono documentati i requisiti approvati per le prossime iterazioni di sviluppo:
+
+1. **Eliminazione dello stato "In Progress"**
+   - Mantenere esclusivamente due stati: **To Do** e **Done**.
+   - Aggiornamento della Kanban board a due colonne e adattamento di tutte le azioni di avanzamento rapido, drag & drop e schema DB.
+2. **Notifica giornaliera scadenze odierne ("Oggi scadono le seguenti attività...")**
+   - Integrare esplicitamente nel flusso delle notifiche giornaliere per le attività a lungo termine la dicitura e l'elenco dedicato: *"Oggi scadono le seguenti attività: ..."*.
+3. **Deep Linking delle Notifiche su Attività Specifica**
+   - Al tocco/click su una notifica push, aprire direttamente la schermata/modale di dettaglio del task di riferimento.
+   - *Nota di design*: definire il piano d'azione (es. parametro URL `?taskId=<id>`, gestione stato di apertura automatica della modale via `SearchProvider` o `TaskDetailModal`).
+4. **Nuova Icona dell'App e delle Notifiche**
+   - Creazione e sostituzione delle icone PWA (`/public/icons/icon-192x192.png`, `512x512`, `icon.svg`) e badge monocromatico dedicato per la barra delle notifiche Android/iOS.
+5. **Restyling e Aggiornamento Stile dell'App**
+   - Refresh del design visuale, componenti UI, animazioni, palette colori e rifiniture grafiche per migliorare ulteriormente l'esperienza utente.
+
